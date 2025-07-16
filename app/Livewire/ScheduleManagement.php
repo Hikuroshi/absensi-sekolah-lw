@@ -24,6 +24,10 @@ class ScheduleManagement extends Component
     // Form properties
     public $class_id, $subject_id, $user_id, $day, $start_time, $end_time;
 
+    public string $classFilter = '';
+    public string $dayFilter = '';
+    protected $queryString = ['search', 'classFilter', 'dayFilter'];
+
     #[Computed]
     public function schedules()
     {
@@ -51,6 +55,12 @@ class ScheduleManagement extends Component
                   ->orWhere('subjects.name', 'like', "%{$this->search}%")
                   ->orWhere('users.name', 'like', "%{$this->search}%");
             });
+        }
+        if ($this->classFilter) {
+            $query->where('schedules.class_id', $this->classFilter);
+        }
+        if ($this->dayFilter) {
+            $query->where('schedules.day', $this->dayFilter);
         }
         return $query->paginate(10);
     }

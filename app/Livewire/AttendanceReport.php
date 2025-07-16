@@ -53,12 +53,12 @@ class AttendanceReport extends Component
     }
 
     // Export absensi efisien tanpa queue, dengan filter dan pembatasan data
-    public function exportReport(Request $request)
+    public function exportReport()
     {
-        $dateFrom = $request->input('dateFrom', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $dateTo = $request->input('dateTo', Carbon::now()->format('Y-m-d'));
-        $selectedClass = $request->input('selectedClass');
-        $searchStudent = $request->input('searchStudent', '');
+        $dateFrom = request()->input('dateFrom', Carbon::now()->startOfMonth()->format('Y-m-d'));
+        $dateTo = request()->input('dateTo', Carbon::now()->format('Y-m-d'));
+        $selectedClass = request()->input('selectedClass');
+        $searchStudent = request()->input('searchStudent', '');
 
         $maxRows = 10000;
 
