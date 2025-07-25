@@ -2,20 +2,41 @@
 
 namespace Database\Factories;
 
-use App\Models\ClassMember;
+use App\Enums\ClassRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ClassMember>
+ */
 class ClassMemberFactory extends Factory
 {
-    protected $model = ClassMember::class;
-
-    public function definition(): array
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition()
     {
         return [
-            'class_id' => null, // diisi di seeder
-            'user_id' => null, // diisi di seeder
-            'role' => $this->faker->randomElement(['siswa','guru','ketua_kelas']),
-            'is_active' => true,
+            'role' => ClassRole::SISWA,
         ];
     }
-} 
+
+    public function ketuaKelas()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => ClassRole::KETUA_KELAS,
+            ];
+        });
+    }
+
+    public function waliKelas()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => ClassRole::WALI_KELAS,
+            ];
+        });
+    }
+}

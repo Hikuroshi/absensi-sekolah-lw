@@ -2,27 +2,52 @@
 
 namespace Database\Factories;
 
+use App\Enums\Days;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Classes;
-use App\Models\Subject;
-use App\Models\User;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Schedule>
+ */
 class ScheduleFactory extends Factory
 {
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
-        $days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        $startHour = $this->faker->numberBetween(7, 14); // Jam pelajaran 07:00 - 14:00
-        $startMinute = $this->faker->randomElement([0, 30]);
-        $startTime = sprintf('%02d:%02d', $startHour, $startMinute);
-        $endTime = date('H:i', strtotime($startTime . ' +90 minutes'));
+        // Generate random time between 07:00 and 15:00
+        $startTime = Carbon::createFromTime(
+            fake()->numberBetween(7, 15),
+            fake()->randomElement([0, 15, 30, 45])
+        );
+
+        // Add 1-2 hours for end time
+        $endTime = (clone $startTime)->addHours(fake()->numberBetween(1, 2));
+
         return [
-            'class_id' => Classes::inRandomOrder()->first()?->id ?? 1,
-            'subject_id' => Subject::inRandomOrder()->first()?->id ?? 1,
-            'user_id' => User::where('role', 'guru')->inRandomOrder()->first()?->id ?? 1,
-            'day' => $this->faker->randomElement($days),
-            'start_time' => $startTime,
-            'end_time' => $endTime,
+            'day' => fake()->randomElement(Days::cases())->value,
+            'start_time' => $startTime->format('H:i'),
+            'end_time' => $endTime->format('H:i'),
         ];
     }
-} 
+
+    // State for specific days
+    public function day(Days $day): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'day' => $day->value,
+        ]);
+    }
+
+    // State for specific time range
+    public function timeRange(string $start, string $end): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'start_time' => $start,
+            'end_time' => $end,
+        ]);
+    }
+}

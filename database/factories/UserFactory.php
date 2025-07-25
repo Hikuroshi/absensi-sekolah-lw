@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -21,24 +22,62 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
+    public function definition()
     {
-        $role = $this->faker->randomElement(['siswa', 'guru', 'ketua_kelas', 'admin']);
-        $idNumber = match($role) {
-            'guru' => $this->faker->unique()->numerify('########'),
-            'siswa', 'ketua_kelas' => $this->faker->unique()->numerify('########'),
-            'admin' => 'ADM' . $this->faker->unique()->numerify('###'),
-            default => 'ID' . $this->faker->unique()->numerify('########'),
-        };
         return [
             'name' => fake()->name(),
+            'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'role' => fake()->randomElement([UserRole::ADMIN, UserRole::GURU, UserRole::SISWA]),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role' => $role,
-            'id_number' => $idNumber,
         ];
+    }
+
+    public function admin()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => UserRole::ADMIN,
+            ];
+        });
+    }
+
+    public function guru()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => UserRole::GURU,
+            ];
+        });
+    }
+
+    public function siswa()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => UserRole::SISWA,
+            ];
+        });
+    }
+
+    public function ketuaKelas()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => UserRole::KETUA_KELAS,
+            ];
+        });
+    }
+
+    public function waliKelas()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => UserRole::WALI_KELAS,
+            ];
+        });
     }
 
     /**
@@ -46,7 +85,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
         ]);
     }

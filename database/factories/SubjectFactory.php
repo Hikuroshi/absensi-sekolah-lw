@@ -2,20 +2,39 @@
 
 namespace Database\Factories;
 
-use App\Models\Subject;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Subject>
+ */
 class SubjectFactory extends Factory
 {
-    protected $model = Subject::class;
-
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
     public function definition(): array
     {
         return [
-            'name' => $this->faker->unique()->word() . ' ' . $this->faker->randomElement(['Dasar','Lanjutan','Inti','Pilihan']),
-            'code' => strtoupper($this->faker->unique()->lexify('???')),
-            'description' => $this->faker->sentence(),
-            'is_active' => true,
+            'name' => fake()->unique()->sentence(3),
+            'code' => 'SUB-' . fake()->unique()->bothify('??###'),
+            'description' => fake()->boolean(70) ? fake()->paragraph() : null,
         ];
     }
-} 
+
+    // Optional state for specific cases
+    public function withDescription(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'description' => fake()->paragraph(),
+        ]);
+    }
+
+    public function withoutDescription(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'description' => null,
+        ]);
+    }
+}

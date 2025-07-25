@@ -2,27 +2,43 @@
 
 namespace App\Models;
 
+use App\Enums\ClassRole;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ClassMember extends Model
+class ClassMember extends Pivot
 {
-    use HasFactory;
+    use HasUuids, HasFactory;
 
-    protected $fillable = [
-        'class_id',
-        'user_id',
-        'type',
-        'is_active'
-    ];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
 
-    public function class(): BelongsTo
+    public function casts(): array
     {
-        return $this->belongsTo(Classes::class);
+        return [
+            'role' => ClassRole::class,
+        ];
     }
 
-    public function user(): BelongsTo
+    public function scopeSearch($query, $search)
+    {
+        $query->when($search, function ($query) use ($search) {
+            $query->whereAny(['role'], 'like', '%' . $search . '%')
+                ->orWhereHas('classroom', function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('user', function ($query) use ($search) {
+                    $query->where('name', 'like', '%' . $search . '%');
+                });
+        });
+    }
+
+    public function classroom()
+    {
+        return $this->belongsTo(Classroom::class);
+    }
+
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
